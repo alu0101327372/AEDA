@@ -1,0 +1,135 @@
+#ifndef ABB_HPP
+#define ABB_HPP
+
+#include "AB.hpp"
+
+/** 
+ * University of La Laguna
+ * Arbol Binario de Búsqueda
+ * Advanced Data Structures and Algorithms
+ * @author Marco Antonio Cabrera Hernández
+ * Contact: alu0101327372@ull.edu.es
+ * Compilation: g++ -std=c++11 -g -Wall main.cpp -o main
+ */
+
+
+template<class Clave>
+class ABB : public AB<Clave> {
+    public:
+        ABB();
+        ~ABB();
+
+        bool Buscar(Clave&); // Buscar un valor en el arbol
+        void Insertar(const Clave&); // Inserción en el arbol
+        void Eliminar(const Clave&); // Eliminar un nodo del arbol
+
+    private:
+        bool BuscarRama(nodoAVL<Clave>*, const Clave&);
+        void InsertarRama(nodoAVL<Clave>*&, const Clave&);
+        void EliminarRama(nodoAVL<Clave>*&, const Clave&);
+        void Sustituye(nodoAVL<Clave>*&, nodoAVL<Clave>*&);
+};
+
+
+
+template<class Clave>
+ABB<Clave>::ABB() : AB<Clave>() {}
+
+
+
+template<class Clave>
+ABB<Clave>::~ABB() {}
+
+
+
+template<class Clave>
+bool
+ABB<Clave>::Buscar(Clave& X) {
+    return BuscarRama(this->get_raiz(), X);
+}
+
+
+
+template<class Clave>
+bool
+ABB<Clave>::BuscarRama(nodoAVL<Clave>* nodo, const Clave& X) {
+    if (nodo == NULL) return false;
+    if (X == nodo->get_dato()) return true;
+
+    bool clave1 = BuscarRama(nodo->get_izq(), X);
+    if (clave1 == true)
+        return true;
+
+    return BuscarRama(nodo->get_der(), X);
+}
+
+
+
+template<class Clave>
+void
+ABB<Clave>::Insertar(const Clave& X) {
+    InsertarRama(this->get_raiz(), X);
+}
+
+
+
+template<class Clave>
+void
+ABB<Clave>::InsertarRama(nodoAVL<Clave>*& nodo, const Clave& X) {
+    if (nodo == NULL) 
+        nodo = new nodoAVL<Clave>(X);
+
+    else if (X < nodo->get_dato())
+        InsertarRama(nodo->get_izq(), X);
+
+    else
+        InsertarRama(nodo->get_der(), X); 
+}
+
+
+
+template<class Clave>
+void
+ABB<Clave>::Eliminar(const Clave& X) {
+    EliminarRama(this->get_raiz(), X);
+}
+
+
+
+template<class Clave>
+void
+ABB<Clave>::EliminarRama(nodoAVL<Clave>*& nodo, const Clave& X) {
+    if (nodo == NULL) return;
+    if (X < nodo->get_dato())
+        EliminarRama(nodo->get_izq(), X);
+    else if (X > nodo->get_dato())
+        EliminarRama(nodo->get_der(), X);
+    else {
+        nodoAVL<Clave>* Eliminado= nodo;
+        if (nodo->get_der() == NULL)
+            nodo = nodo->get_izq();
+        else if (nodo->get_izq() == NULL)
+            nodo = nodo->get_der();
+        else 
+            Sustituye(Eliminado, nodo->get_izq());
+
+        delete Eliminado;
+    }
+}
+
+
+
+template<class Clave>
+void
+ABB<Clave>::Sustituye(nodoAVL<Clave>*& Eliminado, nodoAVL<Clave>*& Sust) {
+    if (Sust->get_der() != NULL)
+        Sustituye(Eliminado, Sust->get_der());
+    else {
+        Eliminado->get_dato() = Sust->get_dato();
+        Eliminado = Sust;
+        Sust = Sust->get_izq();
+    }
+}
+
+
+#endif // ABB_HPP
